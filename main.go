@@ -7,7 +7,6 @@ import (
 	"os"
 	"sort"
 
-	"github.com/andrewrobinson/glint/model"
 	"github.com/andrewrobinson/glint/util"
 )
 
@@ -33,20 +32,10 @@ func main() {
 		return rows[i].AmountGBP > rows[j].AmountGBP
 	})
 
-	// return top 5 spends
-	topSpends := getTopSpends(rows, 5)
+	// return max 5 from the sorted rows
+	topSpends := util.GetTopSpends(rows, 5)
 
-	fmt.Println("top 5 Spends")
+	fmt.Println("top 5 Card Spends in August 2020")
 	util.PrintTopSpends(topSpends)
-
-}
-
-func getTopSpends(rows []model.Customer, limit int) []model.Customer {
-
-	if len(rows) >= limit {
-		return rows[0:limit]
-	} else {
-		return rows
-	}
 
 }

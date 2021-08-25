@@ -7,33 +7,39 @@ import (
 
 func TestDateInAugust2020(t *testing.T) {
 
-	t.Run("positive", func(t *testing.T) {
+	t.Run("a mixture of dates either side of August 2020", func(t *testing.T) {
 
-		date, _ := time.Parse(time.RFC822, "01 Aug 2020 10:00 UTC")
-		ShouldBeTrue(t, date)
+		var date time.Time
 
-		// date, _ := time.Parse(time.RFC822, "01 Aug 2020 10:00 UTC")
-		// ShouldBeTrue(t, date)
+		date, _ = time.Parse(time.RFC3339, "2020-07-30T00:00:00Z")
+		ShouldNotBeDateInAugust2020(t, date)
+		date, _ = time.Parse(time.RFC3339, "2020-07-31T23:59:59Z")
+		ShouldNotBeDateInAugust2020(t, date)
 
-	})
+		date, _ = time.Parse(time.RFC3339, "2020-08-01T00:00:00Z")
+		ShouldBeDateInAugust2020(t, date)
 
-	t.Run("01 July 2020 is not in Aug 2020", func(t *testing.T) {
+		date, _ = time.Parse(time.RFC3339, "2020-08-01T15:04:05Z")
+		ShouldBeDateInAugust2020(t, date)
 
-		date, _ := time.Parse(time.RFC822, "01 Jul 2020 10:00 UTC")
-		ShouldBeFalse(t, date)
+		date, _ = time.Parse(time.RFC3339, "2020-08-31T23:59:59Z")
+		ShouldBeDateInAugust2020(t, date)
+
+		date, _ = time.Parse(time.RFC3339, "2020-09-01T00:00:00Z")
+		ShouldNotBeDateInAugust2020(t, date)
 
 	})
 
 }
 
-func ShouldBeTrue(t *testing.T, date time.Time) {
+func ShouldBeDateInAugust2020(t *testing.T, date time.Time) {
 	if !dateInAugust2020(date) {
 		t.Errorf("DateInAugust2020 should evaluate true for date:%v", date)
 	}
 
 }
 
-func ShouldBeFalse(t *testing.T, date time.Time) {
+func ShouldNotBeDateInAugust2020(t *testing.T, date time.Time) {
 	if dateInAugust2020(date) {
 		t.Errorf("DateInAugust2020 should NOT evaluate true for date:%v", date)
 	}

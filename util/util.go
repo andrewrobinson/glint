@@ -2,8 +2,6 @@ package util
 
 import (
 	"fmt"
-	"log"
-	"strconv"
 	"time"
 
 	"github.com/andrewrobinson/glint/model"
@@ -24,73 +22,41 @@ func GetCardSpendsInAugust2020(data [][]string) []model.Customer {
 		}
 
 		// and normalise amount to GBP
-		customer := buildCustomer(line)
+		customer := model.BuildCustomerFromCsvRow(line)
 
 		// filter by date in Aug 2020
-		// if dateInAugust2020(customer.Date) {
-		rows = append(rows, customer)
-		// }
+		if dateInAugust2020(customer.Date) {
+			rows = append(rows, customer)
+		}
 
 	}
 	return rows
 }
 
-func buildCustomer(line []string) model.Customer {
+func GetTopSpends(rows []model.Customer, limit int) []model.Customer {
 
-	amountString := line[5]
-	rateString := line[8]
-	dateString := line[9]
-
-	rate, err := strconv.ParseFloat(rateString, 64)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	amount, err := strconv.ParseFloat(amountString, 64)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	date, err := time.Parse("02/01/2006 15:04", dateString)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	return model.Customer{
-		FirstName:    line[0],
-		LastName:     line[1],
-		Email:        line[2],
-		Description:  line[3],
-		Amount:       amount,
-		AmountGBP:    amount * rate,
-		FromCurrency: line[6],
-		ToCurrency:   line[7],
-		Rate:         rate,
-		Date:         date,
+	if len(rows) >= limit {
+		return rows[0:limit]
+	} else {
+		return rows
 	}
 
 }
 
 func dateInAugust2020(date time.Time) bool {
 
-	start, _ := time.Parse(time.RFC822, "01 Aug 2020 10:00 UTC")
-	end, _ := time.Parse(time.RFC822, "31 Aug 2020 23:59 UTC")
-
-	if inTimeSpan(start, end, date) {
-		fmt.Printf("date:%+v is in August 2020\n", date)
-	}
-	// } else {
-	// 	fmt.Printf("date:%+v is NOT in August 2020\n", date)
-	// }
+	start, _ := time.Parse(time.RFC3339, "2020-08-01T00:00:00Z")
+	end, _ := time.Parse(time.RFC3339, "2020-08-31T23:59:59Z")
 
 	return inTimeSpan(start, end, date)
 }
 
 func inTimeSpan(start, end, check time.Time) bool {
-	return check.After(start) && check.Before(end)
+	//this I got off the internet
+	// return check.After(start) && check.Before(end)
+
+	//but my unit tests made me change it to this
+	return (check.After(start) && check.Before(end)) || check.Equal(start) || check.Equal(end)
 }
 
 func PrintTopSpends(rows []model.Customer) {

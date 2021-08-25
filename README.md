@@ -29,3 +29,5 @@ Can you guarantee uniqueness of email address per customer / in this data
 Else you need to create some kind of composite primary key
 
 5) I didn't want to spend too much time but it is getting time for unit tests
+
+6) I haven't considered time zones. Just got away with parsing as zoneless/UTC and comparing as same
