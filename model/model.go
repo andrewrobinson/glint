@@ -4,6 +4,8 @@ import (
 	"log"
 	"strconv"
 	"time"
+
+	"github.com/luno/luno-go/decimal"
 )
 
 type Customer struct {
@@ -11,8 +13,8 @@ type Customer struct {
 	LastName     string
 	Email        string
 	Description  string
-	Amount       float64
-	AmountGBP    float64
+	Amount       decimal.Decimal
+	AmountGBP    decimal.Decimal
 	FromCurrency string
 	ToCurrency   string
 	Rate         float64
@@ -31,7 +33,7 @@ func BuildCustomerFromCsvRow(line []string) Customer {
 		log.Fatal(err)
 	}
 
-	amount, err := strconv.ParseFloat(amountString, 64)
+	amount, err := decimal.NewFromString(amountString)
 
 	if err != nil {
 		log.Fatal(err)
@@ -49,7 +51,7 @@ func BuildCustomerFromCsvRow(line []string) Customer {
 		Email:        line[2],
 		Description:  line[3],
 		Amount:       amount,
-		AmountGBP:    amount * rate,
+		AmountGBP:    amount.MulInt64(rate),
 		FromCurrency: line[6],
 		ToCurrency:   line[7],
 		Rate:         rate,
