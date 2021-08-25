@@ -1,4 +1,3 @@
-*
 
 Issues -
 
@@ -29,4 +28,4 @@ We got into discussion about aggregating amounts according to a unique identifie
 Can you guarantee uniqueness of email address per customer / in this data
 Else you need to create some kind of composite primary key
 
-*/
+5) I didn't want to spend too much time but it is getting time for unit tests
