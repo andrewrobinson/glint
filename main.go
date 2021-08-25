@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"sort"
 	"strconv"
 	"time"
 )
@@ -22,13 +23,83 @@ type Customer struct {
 	date         time.Time
 }
 
+func main() {
+
+	f, err := os.Open("sample-transactions.csv")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer f.Close()
+
+	csvReader := csv.NewReader(f)
+	data, err := csvReader.ReadAll()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// CARD SPENDs in August 2020
+	rows := getMatchingRows(data)
+
+	// sort by amountGBP
+	sort.Slice(rows, func(i, j int) bool {
+		return rows[i].amountGBP > rows[j].amountGBP
+	})
+
+	// return top 5 spends
+	topSpends := getTopSpends(rows, 5)
+
+	fmt.Println("top 5 Spends")
+	printTopSpends(topSpends)
+
+	// fmt.Printf("len rows:%d\n", len(rows))
+	// fmt.Printf("len topSpends:%d\n", len(topSpends))
+
+}
+
+func printTopSpends(rows []Customer) {
+	for _, row := range rows {
+		fmt.Printf("email:%s, amountGBP:%.2f\n", row.email, row.amountGBP)
+	}
+
+}
+
+func getMatchingRows(data [][]string) []Customer {
+
+	rows := make([]Customer, 0)
+
+	for i, line := range data {
+
+		//TODO - just for debugging
+		if i == 6 {
+			return rows
+		}
+
+		description := line[3]
+
+		// skip the 1st row of the csv
+		// filter by description CARD SPEND
+		if i == 0 || description != "CARD SPEND" {
+			continue
+		}
+
+		// and normalise amount to GBP
+		customer := buildCustomer(line)
+
+		// filter by date in Aug 2020
+		if dateInAugust2020(customer) {
+			rows = append(rows, customer)
+		}
+
+	}
+	return rows
+}
+
 func buildCustomer(line []string) Customer {
 
 	amountString := line[5]
 	rateString := line[8]
 	dateString := line[9]
-
-	// fmt.Printf("rateString: %s\n", rateString)
 
 	rate, err := strconv.ParseFloat(rateString, 64)
 
@@ -48,11 +119,6 @@ func buildCustomer(line []string) Customer {
 		log.Fatal(err)
 	}
 
-	// fmt.Printf("date parsed:%s\n", date)
-	// fmt.Printf("rate parsed:%f\n", rate)
-
-	// First name,Last name,Email,Description,Merchant code,Amount,From Currency,To Currency,Rate,Date
-
 	return Customer{
 		firstName:    line[0],
 		lastName:     line[1],
@@ -68,55 +134,19 @@ func buildCustomer(line []string) Customer {
 
 }
 
-func main() {
-
-	f, err := os.Open("sample-transactions.csv")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	defer f.Close()
-
-	csvReader := csv.NewReader(f)
-	data, err := csvReader.ReadAll()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	rows := make([]Customer, 0)
-
-	for i, line := range data {
-
-		description := line[3]
-
-		if i == 0 || description != "CARD SPEND" {
-			continue
-		}
-
-		if i == 6 {
-			break
-		}
-
-		// 	//filter by description CARD SPEND
-		// 	//filter by date = Aug 2020
-		// 	//normalise amount to GBP
-		// 	//sort by amount
-		// 	//return top 5
-
-		customer := buildCustomer(line)
-
-		if dateInAugust2020(customer) {
-			rows = append(rows, customer)
-		}
-
-	}
-
-	fmt.Printf("%d\n", len(rows))
-
+func dateInAugust2020(customer Customer) bool {
+	//TODO - impl
+	return true
 }
 
-func dateInAugust2020(customer Customer) bool {
-	return true
+func getTopSpends(rows []Customer, limit int) []Customer {
+
+	if len(rows) >= limit {
+		return rows[0:limit]
+	} else {
+		return rows
+	}
+
 }
 
 // func tmp() {
