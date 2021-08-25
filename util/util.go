@@ -9,7 +9,33 @@ import (
 	"github.com/andrewrobinson/glint/model"
 )
 
-func BuildCustomer(line []string) model.Customer {
+func GetCardSpendsInAugust2020(data [][]string) []model.Customer {
+
+	rows := make([]model.Customer, 0)
+
+	for i, line := range data {
+
+		description := line[3]
+
+		// skip the 1st row of the csv
+		// filter by description CARD SPEND
+		if i == 0 || description != "CARD SPEND" {
+			continue
+		}
+
+		// and normalise amount to GBP
+		customer := buildCustomer(line)
+
+		// filter by date in Aug 2020
+		// if dateInAugust2020(customer.Date) {
+		rows = append(rows, customer)
+		// }
+
+	}
+	return rows
+}
+
+func buildCustomer(line []string) model.Customer {
 
 	amountString := line[5]
 	rateString := line[8]
@@ -48,7 +74,7 @@ func BuildCustomer(line []string) model.Customer {
 
 }
 
-func DateInAugust2020(date time.Time) bool {
+func dateInAugust2020(date time.Time) bool {
 
 	start, _ := time.Parse(time.RFC822, "01 Aug 2020 10:00 UTC")
 	end, _ := time.Parse(time.RFC822, "31 Aug 2020 23:59 UTC")
